@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guess the Number Game</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #f0f0f0;
+    }
+
+    h1 {
+        color: #333;
+    }
+
+    form {
+        margin-top: 20px;
+    }
+
+    input[type="number"] {
+        padding: 8px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        transition: border-color 0.3s ease-in-out;
+    }
+
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #66afe9;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 5px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+
+    button:hover {
+        background-color: #45a049;
+        transform: scale(1.1); /* Add scale animation on hover */
+    }
+
+    #message {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #333;
+    }
+
+    .correct {
+        color: #4caf50;
+        font-weight: bold;
+        animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+        from {
+            transform: scale(1);
+        }
+        to {
+            transform: scale(1.1);
+        }
+    }
+</style>
+</head>
+<body>
+<h1>Guess the Number Game</h1>
+<p id="highScore"></p> <!-- Display high score -->
+<form onsubmit="return checkGuess()">
+    <p>Guess a number between 1 and 100:</p>
+    <input type="number" id="guessInput">
+    <button type="submit">Submit Guess</button>
+</form>
+<p id="message"></p>
+<button onclick="playAgain()">Play Again</button> <!-- New button for playing again -->
+<audio id="correctSound" src="correct.mp3"></audio> <!-- Correct sound -->
+<audio id="wrongSound" src="wrong.mp3"></audio> <!-- Wrong sound -->
+<script>
+    // Generate random number between 1 and 100
+    let randomNumber;
+    let attempts;
+
+    // Load high score when the page loads
+    window.onload = function() {
+        displayHighScore();
+        startGame();
+    };
+
+    // Function to save high score
+    function saveHighScore(score) {
+        let highScore = localStorage.getItem('highScore');
+        if (!highScore || score < highScore) {
+            localStorage.setItem('highScore', score);
+            displayHighScore();
+        }
+    }
+
+    // Function to display high score
+    function displayHighScore() {
+        let highScore = localStorage.getItem('highScore');
+        if (highScore) {
+            document.getElementById('highScore').innerText = `High Score: ${highScore}`;
+        }
+    }
+
+    // Function to play correct sound
+    function playCorrectSound() {
+        let audio = document.getElementById('correctSound');
+        audio.play();
+    }
+
+    // Function to play wrong sound
+    function playWrongSound() {
+        let audio = document.getElementById('wrongSound');
+        audio.play();
+    }
+
+    function startGame() {
+        randomNumber = Math.floor(Math.random() * 100) + 1;
+        attempts = 0;
+        document.getElementById('message').innerHTML = '';
+        document.getElementById('guessInput').value = '';
+        document.getElementById('guessInput').disabled = false;
+    }
+
+    function checkGuess() {
+        // Prevent form submission
+        event.preventDefault();
+
+        // Get user's guess
+        const userGuess = parseInt(document.getElementById('guessInput').value);
+        
+        // Increment number of attempts
+        attempts++;
+        
+        // Display appropriate message based on user's guess
+        if (userGuess === randomNumber) {
+            document.getElementById('message').innerHTML = `Congratulations! You guessed the number <span class="correct">${randomNumber}</span> correctly in ${attempts} attempts.`;
+            document.getElementById('guessInput').value = '';
+            document.getElementById('guessInput').disabled = true;
+            saveHighScore(attempts); // Save high score
+            playCorrectSound(); // Play correct sound
+            return false; // Prevent further submissions after correct guess
+        } else if (userGuess < randomNumber) {
+            document.getElementById('message').innerHTML = 'Too low! Try again.';
+        } else {
+            document.getElementById('message').innerHTML = 'Too high! Try again.';
+        }
+
+        // Clear input field after each guess
+        document.getElementById('guessInput').value = '';
+        playWrongSound(); // Play wrong sound
+
+        return false; // Prevent form submission
+    }
+
+    function playAgain() {
+        startGame();
+    }
+</script>
+</body>
+</html>
